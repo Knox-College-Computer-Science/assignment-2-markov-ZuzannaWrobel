@@ -2,7 +2,13 @@ import random
 import glob
 import sys
 import traceback
-
+# Zuzanna Wrobel 
+# Generated from alice.txt (Alice in Wonderland from Project Gutenberg) 3-n gram:
+# 1. it was so large a house that she did not dare to disobey, though she felt sure it would all come
+# 2. before, as the march hare went, 'sh! sh!' and the dormouse sulkily
+# 3. alice could see, as well as she could do, lying down on one side, to
+# 4. talking in his sleep: 'that i breathe when i sleep is the same thing a bit!' said the hatter. 'he won’t stand beating.'
+# 5. alice didn’t think that proved it at all; however, she went on, 'and how
 """
 Markov Babbler
 
@@ -102,6 +108,7 @@ class Babbler:
 
 
     def add_sentence(self, sentence):
+        
         """
         Process the given sentence (a string separated by spaces): 
         Break the sentence into words using split(); 
@@ -112,28 +119,49 @@ class Babbler:
         special symbol 'EOL' in the state transition table. 'EOL' is short for 'end of line'; since it is capitalized and all our input texts are lower-case, it will be unambiguous.
         """
 
-        pass #The pass statement is used as a placeholder for future code. When the pass statement is executed, nothing happens, but you avoid getting an error when empty code is not allowed. Empty code is not allowed in loops, function definitions, class definitions, or in if statements.
+        words= sentence.strip().split()
+        words= [t.lower() for t in words]
+        words.append("EOL")  #marking the end of line
 
+        if len(words)< self.n + 1:
+         return  #not enough words 
+
+    #saving starter
+        starter= ' '.join(words[:self.n])
+        self.starters.append(starter)
+
+        for i in range(len(words) - self.n):
+            ngram= ' '.join(words[i:i + self.n])
+            successor= words[i + self.n]
+            if ngram not in self.brainGraph:
+                self.brainGraph[ngram] = []
+            self.brainGraph[ngram].append(successor)
+
+            if successor == "EOL":
+                self.stoppers.append(ngram) 
 
     def get_starters(self):
+        return self.starters
         """
         Return a list of all of the n-grams that start any sentence we've seen.
         The resulting list may contain duplicates, because one n-gram may start
         multiple sentences. Probably a one-line method.
         """
-        pass
+        
     
 
     def get_stoppers(self):
+        return self.stoppers
         """
         Return a list of all the n-grams that stop any sentence we've seen.
         The resulting value may contain duplicates, because one n-gram may stop
         multiple sentences. Probably a one-line method.
         """
-        pass
+        
 
 
     def get_successors(self, ngram):
+        return self.brainGraph.get(ngram, [])
         """
         Return a list of words that may follow a given n-gram.
         The resulting list may contain duplicates, because each
@@ -146,19 +174,21 @@ class Babbler:
         If the given state never occurs, return an empty list.
         """
 
-        pass
+        
     
 
     def get_all_ngrams(self):
+        return list(self.brainGraph.keys())
         """
         Return all the possible n-grams (sequences of n words), that we have seen across all sentences.
         Probably a one-line method.
         """
 
-        pass
+        
 
     
     def has_successor(self, ngram):
+         return ngram in self.brainGraph and len(self.brainGraph[ngram])> 0
         """
         Return True if the given ngram has at least one possible successor word, and False if it does not. 
         This is another way of asking if we have ever seen a given ngram, 
@@ -166,10 +196,14 @@ class Babbler:
         Probably a one-line method.
         """
 
-        pass
+        
     
     
     def get_random_successor(self, ngram):
+        successors= self.get_successors(ngram)
+        if successors:
+            return random.choice(successors)
+        return None
         """
         Given an n-gram, randomly pick from the possible words that could follow that n-gram. 
         The randomness should take into account how likely a word is to follow the given n-gram.
@@ -181,10 +215,26 @@ class Babbler:
         we should get 'quickly' about 1/3 of the time, and 'with' 2/3 of the time.
         """
 
-        pass
     
 
     def babble(self):
+        if not self.starters:
+            return ""
+        state = random.choice(self.starters)
+        result= state.split()
+
+        while True:
+            successors= self.brainGraph.get(state, [])
+            if not successors:
+                break
+            next_word=random.choice(successors)
+            if next_word== "EOL":
+                break
+            result.append(next_word)
+            words = state.split()[1:]+ [next_word] 
+            state= ' '.join(words)
+
+        return ' '.join(result)
         """
         Generate a random sentence using the following algorithm:
         
@@ -199,7 +249,7 @@ class Babbler:
         6: Repeat from step 2.
         """
 
-        pass
+        
             
 
 # nothing to change here; read, understand, move along
